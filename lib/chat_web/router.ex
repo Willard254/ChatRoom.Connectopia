@@ -23,6 +23,12 @@ defmodule ChatWeb.Router do
     get "/", PageController, :home
   end
 
+  scope "/", ChatWeb do
+  pipe_through [:browser, :require_authenticated_user]
+
+    get "/users/profile", ProfileController, :profile
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", ChatWeb do
   #   pipe_through :api
@@ -68,6 +74,7 @@ defmodule ChatWeb.Router do
       on_mount: [{ChatWeb.UserAuth, :ensure_authenticated}] do
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
+      # live "/users/profile", ProfileLive
     end
   end
 

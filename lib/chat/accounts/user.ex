@@ -12,18 +12,39 @@ defmodule Chat.Accounts.User do
         field :last_name, :string
         field :middle_name, :string
 
+        # new field
+        field :phone_number, :string
+
         timestamps()
     end
 
     def registration_changeset(user, attrs, opts \\ []) do
         user
-        |> cast(attrs, [:email, :password, :username, :first_name, :last_name, :middle_name])
+        |> cast(attrs, [:email, :password, :username, :first_name, :last_name, :middle_name, :phone_number])
         |> validate_email(opts)
         |> validate_password(opts)
         |> validate_username(opts)
         |> validate_first_name(opts)
         |> validate_last_name(opts)
         |> validate_middle_name(opts)
+        |> validate_phone_number(opts)
+    end
+
+    defp validate_phone_number(changeset, opts) do
+        changeset
+        |> validate_required([:phone_number])
+        |> validate_format(:phone_number, ~r/^(?:\+2547\d{9}|07\d{8})$/, message: "must start with 07")
+        |> maybe_validate_unique_phone_number(opts)
+    end
+
+    defp maybe_validate_unique_phone_number(changeset, opts) do
+        if Keyword.get(opts, :validate_phone_number, true) do
+            changeset
+            |> unsafe_validate_unique(:phone_number, Chat.Repo)
+            |> unique_constraint(:phone_number)
+        else
+            changeset
+        end
     end
 
     defp validate_username(changeset, opts) do

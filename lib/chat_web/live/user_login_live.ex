@@ -1,21 +1,18 @@
 defmodule ChatWeb.UserLoginLive do
   use ChatWeb, :live_view
 
-  def render(assigns) do
-    ~H"""
-    <div>
-      <.simple_form for={@form} id="login_form" action={~p"/users/log_in"} phx-update="ignore">
-        <.input field={@form[:email]} type="email" label="Email" required />
-        <.input field={@form[:password]} type="password" label="Password" required />
-        <.button>Sign In</.button>
-      </.simple_form>
-    </div>
-    """
-  end
-
   def mount(_params, _session, socket) do
+    use_email = true
     email = live_flash(socket.assigns.flash, :email)
     form = to_form(%{"email" => email}, as: "user")
-    {:ok, assign(socket, form: form), temporary_assigns: [form: form]}
+    {:ok, assign(socket, form: form, use_email: use_email), temporary_assigns: [form: form]}
+  end
+
+  def handle_event("change", _params, socket) do
+    use_email = !socket.assigns.use_email  # Toggle the use_email flag
+    socket = assign(socket, use_email: use_email)
+    IO.inspect(socket.assigns.use_email, label: "++++")
+    {:noreply,
+     socket}
   end
 end

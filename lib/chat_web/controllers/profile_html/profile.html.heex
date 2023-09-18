@@ -1,0 +1,15 @@
+<body class="bg-white antialiased">
+    <div class="image">
+        <img src={~p"/images/profile.png"} width="50"/>
+      </div>
+    <div class="title">
+        User Profile
+    </div>
+    <div class="profile">
+       <strong>Name : </strong><%= @current_user.first_name %>
+                                <%= @current_user.middle_name %>
+                                <%= @current_user.last_name %> <br>
+        <strong>Email : </strong><%= @current_user.email %> <br>
+        <strong>Phone Number : </strong><%= @current_user.phone_number %> <br>
+    </div>
+</body>

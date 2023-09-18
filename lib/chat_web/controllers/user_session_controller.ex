@@ -19,19 +19,78 @@ defmodule ChatWeb.UserSessionController do
   end
 
   defp create(conn, %{"user" => user_params}, info) do
-    %{"email" => email, "password" => password} = user_params
+    case Map.fetch(user_params, "email") do
+      {:ok, email} when is_binary(email) ->
+        password = user_params["password"]
+        handle_auth(conn, email, password, info)
 
-    if user = Accounts.get_user_by_email_and_password(email, password) do
-      conn
-      |> put_flash(:info, info)
-      |> UserAuth.log_in_user(user, user_params)
-    else
-      conn
-      |> put_flash(:error, "Wrong email or password! :(")
-      |> put_flash(:email, String.slice(email, 0, 160))
-      |> redirect(to: ~p"/users/log_in")
+      :error ->
+        case Map.fetch(user_params, "phone_number") do
+          {:ok, phone_number} when is_binary(phone_number) ->
+            password = user_params["password"]
+            handle_auth(conn, phone_number, password, info)
+
+          :error ->
+            conn
+            |> put_flash(:error, "Email or Phone Number is required.")
+            |> redirect(to: ~p"/users/log_in")
+        end
     end
   end
+
+  defp handle_auth(conn, identifier, password, info) do
+    case Accounts.get_user_by_email_or_phone_and_password(identifier, password) do
+      nil ->
+        conn
+        |> put_flash(:error, "Wrong email, phone number, or password! :(")
+        |> redirect(to: ~p"/users/log_in")
+
+      user ->
+        conn
+        |> put_flash(:info, info)
+        |> UserAuth.log_in_user(user, %{"user" => %{"password" => password}})
+    end
+  end
+
+  # defp create(conn, %{"user" => user_params}, info) do
+  #   %{"phone_number" => phone_number, "password" => password} = user_params
+
+  #   if user = Accounts.get_user_by_phone_number_and_password(phone_number, password) do
+  #     conn
+  #     |> put_flash(:info, info)
+  #     |> UserAuth.log_in_user(user, user_params)
+  #   else
+  #     conn
+  #     |> put_flash(:error, "Wrong phone number or password! :(")
+  #     |> put_flash(:phone_number, String.slice(phone_number, 0, 160))
+  #     |> redirect(to: ~p"/users/log_in")
+  #   end
+  # end
+
+  # defp create(conn, %{"user" => user_params}, info) do
+  #   %{"email" => email, "phone_number" => phone_number, "password" => password} = user_params
+
+  #   user =
+  #     case {email, phone_number} do
+  #       {nil, _} ->
+  #         Accounts.get_user_by_uniqueness_and_password(phone_number, password)
+
+  #       {_, nil} ->
+  #         Accounts.get_user_by_uniqueness_and_password(email, password)
+  #     end
+
+  #   case user do
+  #     nil ->
+  #       conn
+  #       |> put_flash(:error, "Wrong email or phone number or password!")
+  #       |> redirect(to: "/users/log_in")
+
+  #     _ ->
+  #       conn
+  #       |> put_flash(:info, info)
+  #       |> UserAuth.log_in_user(user, user_params)
+  #   end
+  # end
 
   def delete(conn, _params) do
     conn

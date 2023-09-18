@@ -1,0 +1,30 @@
+<div >
+    <h1>Login Form</h1>
+      <.simple_form for={@form} id="login_form" action={~p"/users/log_in"} >
+
+        <div class="flex justify-center">
+        <label class="relative inline-flex items-center cursor-pointer">
+  <input phx-change="change" type="checkbox" value="" class="sr-only peer" checked>
+  <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+  <%= if @use_email == true do %>
+
+
+
+  <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Email</span>
+  <% else %>
+  <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Phone Number</span>
+
+  <% end %>
+</label>
+    </div>
+        <%= if @use_email do %>
+        <.input field={@form[:email]} type="email" label="Email" placeholder="Email"  />
+          <% else %>
+
+        <.input field={@form[:phone_number]} type="text" label="Phone Number" placeholder="Phone Number"  />
+        <% end %>
+
+        <.input field={@form[:password]} type="password" label="Password" placeholder="Password" required />
+        <.button>Sign In</.button>
+      </.simple_form>
+    </div>

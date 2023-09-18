@@ -24,15 +24,65 @@ defmodule Chat.Accounts do
     end
   end
 
-  def get_user_by_email(email) when is_binary(email) do
-    Repo.get_by(User, email: email)
+  # def get_user_by_email(email) when is_binary(email) do
+  #   Repo.get_by(User, email: email)
+  # end
+
+  # def get_user_by_email_and_password(email, password)
+  #     when is_binary(email) and is_binary(password) do
+  #       user = Repo.get_by(User, email: email)
+  #       if User.valid_password?(user, password), do: user
+  # end
+
+  def get_user_by_email_or_phone(email_or_phone) when is_binary(email_or_phone) do
+    user =
+      case Regex.scan(~r/@/, email_or_phone) do
+        [["@"]] ->
+          Repo.get_by(User, email: email_or_phone)
+
+        _ ->
+          Repo.get_by(User, phone_number: email_or_phone)
+      end
+
+    user
   end
 
-  def get_user_by_email_and_password(email, password)
-      when is_binary(email) and is_binary(password) do
-        user = Repo.get_by(User, email: email)
+  def get_user_by_email_or_phone_and_password(email_or_phone, password)
+      when is_binary(email_or_phone) and is_binary(password) do
+        user =
+          case Regex.scan(~r/@/, email_or_phone) do
+            [["@"]] ->
+              Repo.get_by(User, email: email_or_phone)
+
+            _ ->
+              Repo.get_by(User, phone_number: email_or_phone)
+          end
+
         if User.valid_password?(user, password), do: user
   end
+
+  # def get_user_by_phone_number(phone_number) when is_binary(phone_number) do
+  #   Repo.get_by(User, phone_number: phone_number)
+  # end
+
+  # def get_user_by_phone_number_and_password(phone_number, password)
+  #   when is_binary(phone_number) and is_binary(password) do
+  #     user = Repo.get_by(User, phone_number: phone_number)
+  #     if User.valid_password?(user, password), do: user
+  # end
+
+  # def get_user_by_uniqueness_and_password(key, value, password)
+  #   when is_binary(value) and is_binary(password) do
+  #     user = case key do
+  #       :email ->
+  #         Repo.get_by(User, email: value)
+
+  #       :phone_number ->
+  #         Repo.get_by(User, phone_number: value)
+  #       end
+
+  #       if User.valid_password?(user, password), do: user
+  #     end
 
   def get_user!(id), do: Repo.get!(User, id)
 
